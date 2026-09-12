@@ -8,6 +8,8 @@ const schedule = [
   ["VOICE TEST A/B", "RECOVERED 09.16.26", "SEALED"],
 ];
 
+const assetBase = process.env.NEXT_PUBLIC_BASE_PATH || "";
+
 export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -107,7 +109,7 @@ export default function Home() {
           <div className="player" aria-label="Tape 13 audio player">
             <audio
               ref={audioRef}
-              src="/tape-13-side-a.mp3"
+              src={`${assetBase}/tape-13-side-a.mp3`}
               preload="metadata"
               onLoadedMetadata={(event) => {
                 const loadedDuration = event.currentTarget.duration;
