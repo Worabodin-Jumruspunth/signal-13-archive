@@ -5,7 +5,8 @@ import { useRef, useState } from "react";
 const schedule = [
   ["TAPE 13", "RECOVERED 09.12.26", "AVAILABLE"],
   ["ENGINEER LOG 04", "RECOVERED 09.14.26", "SEALED"],
-  ["VOICE TEST A/B", "RECOVERED 09.16.26", "SEALED"],
+  ["STAFF PHOTO 1998", "RECOVERED 09.16.26", "SEALED"],
+  ["VOICE TEST A/B", "RECOVERED 09.18.26", "SEALED"],
 ];
 
 const assetBase = process.env.NEXT_PUBLIC_BASE_PATH || "";
@@ -23,6 +24,7 @@ export default function Home() {
   const [fireError, setFireError] = useState(false);
   const [fireUnlocked, setFireUnlocked] = useState(false);
   const [photoEnhanced, setPhotoEnhanced] = useState(false);
+  const [photoFlipped, setPhotoFlipped] = useState(false);
   const [photoCode, setPhotoCode] = useState("");
   const [photoError, setPhotoError] = useState(false);
   const [photoUnlocked, setPhotoUnlocked] = useState(false);
@@ -207,13 +209,24 @@ export default function Home() {
             <h4 id="staff-photo-title">There are four names on the back.</h4>
             <p className="photo-intro">The photograph was fused to Gideon’s log. The paper roster identifies every person in the room—but the archive’s facial counter keeps returning five.</p>
 
-            <div className={photoEnhanced ? "photo-frame enhanced" : "photo-frame"}>
-              <img src={`${assetBase}/staff-photo-1998.png`} alt="Four WBLW employees posing in a radio studio; a faint fifth figure is reflected in the dark control-room glass."/>
-              {photoEnhanced && <div className="scan-overlay" aria-live="polite"><span>SUBJECTS DETECTED: 05</span><b>SUBJECT 05 // FACIAL MATCH: M. VENN // 96.4%</b></div>}
+            <div className={`${photoEnhanced ? "photo-frame enhanced" : "photo-frame"}${photoFlipped ? " flipped" : ""}`}>
+              {!photoFlipped ? <>
+                <img src={`${assetBase}/staff-photo-1998.png`} alt="Four WBLW employees posing in a radio studio; a faint fifth figure is reflected in the dark control-room glass."/>
+                {photoEnhanced && <div className="scan-overlay" aria-live="polite"><span>FIVE SIGNAL CLUSTERS DETECTED</span><b className="morse-code" aria-label="Recovered Morse code">-- ...- &nbsp;/&nbsp; ----- ..... &nbsp;/&nbsp; .---- ----. ----. ---..</b></div>}
+              </> : <div className="photo-back" aria-label="Back of the WBLW staff photograph">
+                <span>WBLW STAFF // OCT. 13, 1998</span>
+                <p>Gideon Vale<br/>Eli Venn<br/>Ruth Mercer<br/>Owen Pike</p>
+                <b>Four employees. Do not catalog the reflection.</b>
+                <div className="back-stamp">NEGATIVE 13-B<br/>SUBJECT FORMAT: INITIALS // NUMBER - YEAR</div>
+                <small>Something else is written beneath the paper backing. I can’t read it yet. — M</small>
+              </div>}
             </div>
-            <button className="enhance-photo" onClick={() => setPhotoEnhanced(value => !value)}>{photoEnhanced ? "RESTORE ORIGINAL EXPOSURE" : "RUN CONTRAST RECOVERY"}</button>
+            <div className="photo-tools">
+              <button className="enhance-photo" disabled={photoFlipped} onClick={() => setPhotoEnhanced(value => !value)}>{photoEnhanced ? "RESTORE ORIGINAL EXPOSURE" : "RUN CONTRAST RECOVERY"}</button>
+              <button className="flip-photo" onClick={() => setPhotoFlipped(value => !value)}>{photoFlipped ? "TURN TO FRONT" : "TURN PHOTOGRAPH OVER"}</button>
+            </div>
 
-            <div className="photo-evidence">
+            {photoFlipped && <div className="photo-evidence">
               <div className="staff-roster">
                 <span>REVERSE-SIDE ROSTER // LEFT TO RIGHT</span>
                 <p><b>01</b> GIDEON VALE // CHIEF ENGINEER</p>
@@ -226,7 +239,7 @@ export default function Home() {
                 <p>Unlisted subjects continue the roster sequence.</p>
                 <b>IDENTITY FORMAT:<br/>INITIALS // SUBJECT - YEAR</b>
               </div>
-            </div>
+            </div>}
 
             <form className="code-entry photo-code" onSubmit={checkPhotoCode}>
               <label htmlFor="photo-code">SUBJECT 05 IDENTITY STRING</label>
@@ -248,8 +261,8 @@ export default function Home() {
       <section className="index">
         <div className="section-heading"><span>03</span><div><p>CATALOG INDEX</p><h2>Recovered material</h2></div></div>
         <div className="records">
-          {schedule.map(([name,date,status],i)=><div className={status === "SEALED" && !(i === 1 && unlocked) && !(i === 2 && fireUnlocked) ? "record sealed" : "record"} key={name}>
-            <span className="record-no">{String(i+1).padStart(2,"0")}</span><div><h3>{name}</h3><p>{date}</p></div><b>{i === 1 && unlocked ? "UNLOCKED" : i === 2 && fireUnlocked ? photoUnlocked ? "IDENTIFIED" : "UNLOCKED" : status}</b>
+          {schedule.map(([name,date,status],i)=><div className={status === "SEALED" && !(i === 1 && unlocked) && !(i === 2 && fireUnlocked) && !(i === 3 && photoUnlocked) ? "record sealed" : "record"} key={name}>
+            <span className="record-no">{String(i+1).padStart(2,"0")}</span><div><h3>{name}</h3><p>{date}</p></div><b>{i === 1 && unlocked ? "UNLOCKED" : i === 2 && fireUnlocked ? photoUnlocked ? "IDENTIFIED" : "UNLOCKED" : i === 3 && photoUnlocked ? "POINTER FOUND" : status}</b>
           </div>)}
         </div>
         <p className="notice">Additional material will be released as it is stabilized. Do not call the number written on the cassette.</p>
