@@ -29,6 +29,7 @@ export default function Home() {
   const [photoCode, setPhotoCode] = useState("");
   const [photoError, setPhotoError] = useState(false);
   const [photoUnlocked, setPhotoUnlocked] = useState(false);
+  const [chapter4Solved, setChapter4Solved] = useState(false);
 
   useEffect(() => {
     try {
@@ -36,10 +37,11 @@ export default function Home() {
       setUnlocked(saved.engineerLog === true);
       setFireUnlocked(saved.staffPhoto === true);
       setPhotoUnlocked(saved.voiceTest === true);
+      setChapter4Solved(saved.chapter4Solved === true);
     } catch {}
   }, []);
 
-  const saveProgress = (progress: {engineerLog: boolean; staffPhoto: boolean; voiceTest: boolean}) => {
+  const saveProgress = (progress: {engineerLog: boolean; staffPhoto: boolean; voiceTest: boolean; chapter4Solved: boolean}) => {
     try {
       localStorage.setItem(progressKey, JSON.stringify(progress));
     } catch {}
@@ -69,7 +71,7 @@ export default function Home() {
     if (archiveCode.trim().toUpperCase() === "TOWER") {
       setUnlocked(true);
       setCodeError(false);
-      saveProgress({engineerLog: true, staffPhoto: fireUnlocked, voiceTest: photoUnlocked});
+      saveProgress({engineerLog: true, staffPhoto: fireUnlocked, voiceTest: photoUnlocked, chapter4Solved});
     } else {
       setCodeError(true);
     }
@@ -80,7 +82,7 @@ export default function Home() {
     if (engineerCode.trim().toUpperCase() === "WBLW//3B-0113") {
       setFireUnlocked(true);
       setFireError(false);
-      saveProgress({engineerLog: true, staffPhoto: true, voiceTest: photoUnlocked});
+      saveProgress({engineerLog: true, staffPhoto: true, voiceTest: photoUnlocked, chapter4Solved});
     } else {
       setFireError(true);
     }
@@ -91,7 +93,7 @@ export default function Home() {
     if (photoCode.trim().toUpperCase() === "MV//05-1998") {
       setPhotoUnlocked(true);
       setPhotoError(false);
-      saveProgress({engineerLog: true, staffPhoto: true, voiceTest: true});
+      saveProgress({engineerLog: true, staffPhoto: true, voiceTest: true, chapter4Solved});
     } else {
       setPhotoError(true);
     }
@@ -104,6 +106,7 @@ export default function Home() {
     setUnlocked(false);
     setFireUnlocked(false);
     setPhotoUnlocked(false);
+    setChapter4Solved(false);
     setArchiveCode("");
     setEngineerCode("");
     setPhotoCode("");
@@ -221,6 +224,14 @@ export default function Home() {
             <b>STATION // ROOM - FAILURE TIME</b>
             <small>WORDS DO NOT OPEN INCIDENT FILES.</small>
           </div>
+          <details className="engineer-attachment">
+            <summary>ATTACHMENT 2C // SWITCHBOARD ROUTING TEMPLATE</summary>
+            <div>
+              <span>WBLW ENGINEERING DEPARTMENT // REFERENCE COPY</span>
+              <img src={`${assetBase}/routing-template-2c.png`} alt="A station routing reference made from two grids and two crossed-line diagrams"/>
+              <small>First bank unmarked. Repeat bank marked by signal lamps.</small>
+            </div>
+          </details>
           <span>— GIDEON VALE · CHIEF ENGINEER · 1998</span>
 
           <form className="code-entry second-code" onSubmit={checkEngineerCode}>
@@ -254,7 +265,10 @@ export default function Home() {
                 <p>Gideon Vale<br/>Eli Venn<br/>Ruth Mercer<br/>Owen Pike</p>
                 <b>Four employees. Do not catalog the reflection.</b>
                 <div className="back-stamp">NEGATIVE 13-B<br/>SUBJECT FORMAT: INITIALS // NUMBER - YEAR</div>
-                <small>Something else is written beneath the paper backing. I can’t read it yet. — M</small>
+                <div className="back-cipher pigpen-cipher" aria-label="Faint cipher written on the back">
+                  <span>⊐</span><i>7</i><span className="dotted">⊐</span><i>—13</i><span>⊔</span>
+                </div>
+                <small>Nine letters fill the first pen. The same nine return with dots. Numbers stay as written. Append the decoded route to the archive address. — M</small>
               </div>}
             </div>
             <div className="photo-tools">
@@ -288,6 +302,7 @@ export default function Home() {
               <p>IDENTITY CONFIRMED</p><h4>THE WOMAN IN THE GLASS IS MARA VENN.</h4>
               <span>I was born in 2001. This photograph was developed three years earlier. She is wearing my coat.</span>
               <b>NEXT RECOVERY TARGET: VOICE_TEST_AB.WAV</b>
+              <small>ROUTE FRAGMENT RECOVERED FROM REVERSE // SYMBOL KEY MISSING</small>
               <small>— Mara</small>
             </div>}
           </section>}
@@ -298,7 +313,7 @@ export default function Home() {
         <div className="section-heading"><span>03</span><div><p>CATALOG INDEX</p><h2>Recovered material</h2></div></div>
         <div className="records">
           {schedule.map(([name,date,status],i)=><div className={status === "SEALED" && !(i === 1 && unlocked) && !(i === 2 && fireUnlocked) && !(i === 3 && photoUnlocked) ? "record sealed" : "record"} key={name}>
-            <span className="record-no">{String(i+1).padStart(2,"0")}</span><div><h3>{name}</h3><p>{date}</p></div><b>{i === 1 && unlocked ? "UNLOCKED" : i === 2 && fireUnlocked ? photoUnlocked ? "IDENTIFIED" : "UNLOCKED" : i === 3 && photoUnlocked ? "POINTER FOUND" : status}</b>
+            <span className="record-no">{String(i+1).padStart(2,"0")}</span><div><h3>{name}</h3><p>{date}</p></div><b>{i === 1 && unlocked ? "UNLOCKED" : i === 2 && fireUnlocked ? photoUnlocked ? "IDENTIFIED" : "UNLOCKED" : i === 3 && chapter4Solved ? "DECODED" : i === 3 && photoUnlocked ? "POINTER FOUND" : status}</b>
           </div>)}
         </div>
         <p className="notice">Additional material will be released as it is stabilized. Do not call the number written on the cassette.</p>
