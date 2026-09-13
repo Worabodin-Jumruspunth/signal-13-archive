@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const schedule = [
   ["TAPE 13", "RECOVERED 09.12.26", "AVAILABLE"],
@@ -10,6 +10,7 @@ const schedule = [
 ];
 
 const assetBase = process.env.NEXT_PUBLIC_BASE_PATH || "";
+const progressKey = "wblw-signal-13-progress";
 
 export default function Home() {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -28,6 +29,21 @@ export default function Home() {
   const [photoCode, setPhotoCode] = useState("");
   const [photoError, setPhotoError] = useState(false);
   const [photoUnlocked, setPhotoUnlocked] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(progressKey) || "{}");
+      setUnlocked(saved.engineerLog === true);
+      setFireUnlocked(saved.staffPhoto === true);
+      setPhotoUnlocked(saved.voiceTest === true);
+    } catch {}
+  }, []);
+
+  const saveProgress = (progress: {engineerLog: boolean; staffPhoto: boolean; voiceTest: boolean}) => {
+    try {
+      localStorage.setItem(progressKey, JSON.stringify(progress));
+    } catch {}
+  };
 
   const formatTime = (value: number) => {
     if (!Number.isFinite(value)) return "00:00";
@@ -53,6 +69,7 @@ export default function Home() {
     if (archiveCode.trim().toUpperCase() === "TOWER") {
       setUnlocked(true);
       setCodeError(false);
+      saveProgress({engineerLog: true, staffPhoto: fireUnlocked, voiceTest: photoUnlocked});
     } else {
       setCodeError(true);
     }
@@ -63,6 +80,7 @@ export default function Home() {
     if (engineerCode.trim().toUpperCase() === "WBLW//3B-0113") {
       setFireUnlocked(true);
       setFireError(false);
+      saveProgress({engineerLog: true, staffPhoto: true, voiceTest: photoUnlocked});
     } else {
       setFireError(true);
     }
@@ -73,9 +91,27 @@ export default function Home() {
     if (photoCode.trim().toUpperCase() === "MV//05-1998") {
       setPhotoUnlocked(true);
       setPhotoError(false);
+      saveProgress({engineerLog: true, staffPhoto: true, voiceTest: true});
     } else {
       setPhotoError(true);
     }
+  };
+
+  const resetProgress = () => {
+    try {
+      localStorage.removeItem(progressKey);
+    } catch {}
+    setUnlocked(false);
+    setFireUnlocked(false);
+    setPhotoUnlocked(false);
+    setArchiveCode("");
+    setEngineerCode("");
+    setPhotoCode("");
+    setCodeError(false);
+    setFireError(false);
+    setPhotoError(false);
+    setPhotoEnhanced(false);
+    setPhotoFlipped(false);
   };
 
   return (
@@ -280,6 +316,8 @@ export default function Home() {
           <p>This website is part of a fictional mystery-horror game. WBLW, Mara Venn, and the events described here are not real.</p>
           <h3>Content notes</h3><p>Memory loss, disappearance, fire, distorted audio, and mild themes of surveillance.</p>
           <h3>Play safely</h3><p>No clue requires travel, payment, downloads, passwords, private information, or contacting real people. You may stop playing at any time.</p>
+          <h3>Progress</h3><p>Solved archive files are saved automatically on this device. No account is required.</p>
+          <button className="reset-progress" onClick={resetProgress}>RESET ARCHIVE PROGRESS</button>
           <button className="understood" onClick={() => setAboutOpen(false)}>I understand</button>
         </section>
       </div>}
